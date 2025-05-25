@@ -53,7 +53,7 @@ def download_logo(company_url, company_name, save_path="logo_backup"):
         company_name (str): The display name to save the file as.
         save_path (str): Folder path to save the logos.
     """
-    api_key = "1ido2FzbOBCMRcIuMAs"
+    api_key = st.secrets["BRANDFETCH_API_KEY"]
     logo_url = f"https://cdn.brandfetch.io/{company_url}/w/512/h/94/logo?c={api_key}"
 
     # Random user-agent header to avoid basic scraping blocks
