@@ -4,13 +4,14 @@ from src.logos import pull_logos
 from src.output import load_and_process_logos, create_powerpoint, configure_ppt_settings
 import os
 
-logo_path = "logo_cache"
+cache_path = "logo_cache"
+backup_path = "logo_backup"
 
 
 def preview_images():
     logo_files = [
         f
-        for f in os.listdir(logo_path)
+        for f in os.listdir(backup_path)
         if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
     ]
 
@@ -29,7 +30,7 @@ def preview_images():
         for idx, logo_file in enumerate(row):
             with cols[idx]:
                 st.image(
-                    os.path.join(logo_path, logo_file),
+                    os.path.join(backup_path, logo_file),
                     use_container_width=True,
                     caption=logo_file.split(".")[0].title(),
                 )
@@ -51,8 +52,6 @@ if st.button("Download Logos"):
             name.strip() for name in company_input.strip().split("\n") if name.strip()
         ]
         df = pd.DataFrame(company_list, columns=["Company"])
-        # st.success(f"Created a DataFrame with {len(df)} companies.")
-        # st.dataframe(df)
         pull_logos(df)
         st.success("Logo search complete")
         preview_images()
@@ -70,7 +69,7 @@ width = col2.number_input("Width", min_value=0.5, value=5.0, step=1.0)
 
 if st.button("Generate PPT"):
     params = configure_ppt_settings((columns, rows), (width, height))
-    processed = load_and_process_logos(logo_path, **params)
+    processed = load_and_process_logos(cache_path, **params)
     create_powerpoint(processed, **params)
     st.success("Success")
 

@@ -7,6 +7,7 @@ import os
 import streamlit as st
 
 output_file = "logos_presentation.pptx"
+backup_path = "logo_backup"
 
 
 def clear_folder(cache_folder):
@@ -81,12 +82,14 @@ def load_and_process_logos(
 
     clear_folder(folder)
     logos = [
-        f for f in os.listdir(folder) if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        f
+        for f in os.listdir(backup_path)
+        if f.lower().endswith((".png", ".jpg", ".jpeg"))
     ]
     processed_logos = []
 
     for logo in logos:
-        logo_path = os.path.join(folder, logo)
+        logo_path = os.path.join(backup_path, logo)
         img = Image.open(logo_path)
 
         img = remove_white_background(img)
@@ -101,9 +104,9 @@ def load_and_process_logos(
             new_height = int(new_width / aspect_ratio)
 
         img = img.resize((new_width, new_height))
-        img.save(logo_path, format="PNG")
+        img.save(os.path.join(folder, logo), format="PNG")
 
-        processed_logos.append((logo_path, new_width, new_height))
+        processed_logos.append((os.path.join(folder, logo), new_width, new_height))
 
     return processed_logos
 
