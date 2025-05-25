@@ -1,17 +1,22 @@
 import streamlit as st
 import pandas as pd
 from src.logos import pull_logos
-from src.output import load_and_process_logos, create_powerpoint, configure_ppt_settings
+from src.output import (
+    load_and_process_logos,
+    create_powerpoint,
+    configure_ppt_settings,
+    clear_folder,
+)
 import os
 
 cache_path = "logo_cache"
 backup_path = "logo_backup"
 
 
-def preview_images():
+def preview_images(folder):
     logo_files = [
         f
-        for f in os.listdir(backup_path)
+        for f in os.listdir(folder)
         if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
     ]
 
@@ -30,36 +35,56 @@ def preview_images():
         for idx, logo_file in enumerate(row):
             with cols[idx]:
                 st.image(
-                    os.path.join(backup_path, logo_file),
+                    os.path.join(folder, logo_file),
                     use_container_width=True,
                     caption=logo_file.split(".")[0].title(),
                 )
 
 
 st.title("LogoBot")
-st.markdown("Upload your data and get predictions.")
+st.markdown(
+    "Application to dynamically source and reformat company logos, creating a PPT output array"
+)
 
 st.write("### Step 1: Source Logos")
 
 company_input = st.text_area(
-    "Company Names", height=200, placeholder="e.g. Apple\nGoogle\nAmazon"
+    "Input company names to add, separated by a new line",
+    height=200,
+    placeholder="e.g. Apple\nGoogle\nAmazon",
 )
 
-if st.button("Download Logos"):
-    if company_input.strip():
-        # Clean and split the input into a list
-        company_list = [
-            name.strip() for name in company_input.strip().split("\n") if name.strip()
-        ]
-        df = pd.DataFrame(company_list, columns=["Company"])
-        pull_logos(df)
-        st.success("Logo search complete")
-        preview_images()
+c1, c2 = st.columns(2)
 
-    else:
-        st.warning("Please enter at least one company name.")
+with c1:
+    if st.button("Run"):
+        if company_input.strip():
+            # Clean and split the input into a list
+            company_list = [
+                name.strip()
+                for name in company_input.strip().split("\n")
+                if name.strip()
+            ]
+            df = pd.DataFrame(company_list, columns=["Company"])
+            pull_logos(df)
+            st.success("Logo search complete")
+        else:
+            st.warning("Please enter at least one company name.")
+
+with c2:
+    if st.button("Delete all saved logos"):
+        clear_folder(backup_path)
+        st.success("Folder cleared")
+
+st.write("###### Display active logos:")
+if st.button("Preview saved logos"):
+    preview_images(backup_path)
 
 st.write("### Step 2: Generate PPT")
+
+st.write(
+    "###### Tip: ensure that there is sufficient height / width to match the number of rows / columns"
+)
 
 col1, col2 = st.columns(2)
 rows = col1.number_input("Rows", min_value=1, value=5, step=1)
