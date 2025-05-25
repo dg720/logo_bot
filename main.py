@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from src.chatbot import get_company_list_from_prompt
 from src.logos import pull_logos
 from src.output import (
     load_and_process_logos,
@@ -52,19 +53,53 @@ st.markdown(
     "<h3 style='color:#1f77b4;'>🏁 Step 1: Source Logos</h3>", unsafe_allow_html=True
 )
 
-company_input = st.text_area(
-    "✍️ Enter company names (one per line)",
-    height=200,
-    placeholder="e.g. Apple\nGoogle\nAmazon",
+# Initialize session state if not already
+if "manual_input" not in st.session_state:
+    st.session_state.manual_input = ""
+
+# --- Option B: AI-based generation ---
+st.markdown("**Option A: Generate companies using ChatGPT**")
+ai_prompt = st.text_input(
+    "💬 Describe the type of companies (e.g., 'Top 20 automotive OEMs')",
+    key="ai_prompt",
 )
 
+if st.button("🤖 Generate with ChatGPT"):
+    if ai_prompt.strip():
+        with st.spinner("Contacting ChatGPT..."):
+            df_generated = get_company_list_from_prompt(ai_prompt.strip())
+        if not df_generated.empty:
+            generated_text = "\n".join(df_generated["Company"])
+            st.session_state.manual_input = generated_text
+            st.rerun()
+        else:
+            st.error("❌ No companies returned. Try a different prompt.")
+    else:
+        st.warning("⚠️ Please enter a description.")
+
+# --- Option A: Manual entry (auto-filled from AI if used) ---
+st.markdown("**Option B: Enter company names manually**")
+company_input = st.text_area(
+    "✍️ One company per line",
+    height=200,
+    value=st.session_state.manual_input,
+    key="manual_text_input",
+)
+
+# Update session state with current text box content
+st.session_state.manual_input = company_input
+
+st.divider()
+
+# Run and clear buttons
 c1, c2 = st.columns(2)
+
 with c1:
     if st.button("🚀 Run"):
-        if company_input.strip():
+        if st.session_state.manual_input.strip():
             company_list = [
                 name.strip()
-                for name in company_input.strip().split("\n")
+                for name in st.session_state.manual_input.strip().split("\n")
                 if name.strip()
             ]
             df = pd.DataFrame(company_list, columns=["Company"])
