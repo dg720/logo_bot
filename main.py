@@ -42,7 +42,7 @@ def preview_images(folder):
 # ---------------- App Title ----------------
 st.markdown("<h1 style='color:#4A90E2;'>🤖 LogoBot</h1>", unsafe_allow_html=True)
 st.markdown(
-    "<p style='font-size:16px;'>Automatically source, format, and arrange company logos into a downloadable PowerPoint grid.</p>",
+    "<p style='font-size:16px;'>Automatically source, format, and arrange company logos into a downloadable PowerPoint grid. It is recommended to delete all saved logos upon starting the app </p>",
     unsafe_allow_html=True,
 )
 st.divider()
