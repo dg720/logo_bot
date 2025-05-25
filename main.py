@@ -4,7 +4,7 @@ from src.logos import pull_logos
 from src.output import load_and_process_logos, create_powerpoint, configure_ppt_settings
 import os
 
-logo_path = "logo_backup"
+logo_path = "logo_cache"
 
 
 def preview_images():
@@ -72,10 +72,9 @@ if st.button("Generate PPT"):
     params = configure_ppt_settings((columns, rows), (width, height))
     processed = load_and_process_logos(logo_path, **params)
     create_powerpoint(processed, **params)
-    st.success("PPT output")
+    st.success("Success")
 
 st.write("### Step 3: Download PPT")
-
 file_name = "logos_presentation.pptx"
 with open(file_name, "rb") as f:
     st.download_button(

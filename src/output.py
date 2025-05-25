@@ -2,9 +2,23 @@ from pptx import Presentation
 from pptx.util import Inches
 from PIL import Image
 from src.reformat import remove_white_background, auto_crop
+import shutil
 import os
+import streamlit as st
 
 output_file = "logos_presentation.pptx"
+
+
+def clear_folder(cache_folder):
+    for filename in os.listdir(cache_folder):
+        file_path = os.path.join(cache_folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            st.error(f"Failed to delete {file_path}. Reason: {e}")
 
 
 def configure_ppt_settings(logo_positions: tuple, slide_size: tuple):
@@ -64,6 +78,8 @@ def load_and_process_logos(
     row_spacing,
 ):
     """Load, clean, resize, and save logos."""
+
+    clear_folder(folder)
     logos = [
         f for f in os.listdir(folder) if f.lower().endswith((".png", ".jpg", ".jpeg"))
     ]
