@@ -1,6 +1,39 @@
 import streamlit as st
 import pandas as pd
 from src.logos import pull_logos
+from src.output import load_and_process_logos, create_powerpoint
+import os
+
+logo_path = "logo_backup"
+
+
+def preview_images():
+    logo_files = [
+        f
+        for f in os.listdir(logo_path)
+        if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
+    ]
+
+    # Sort alphabetically for consistency
+    logo_files.sort()
+
+    # Choose number of columns
+    cols_per_row = 5
+    rows = [
+        logo_files[i : i + cols_per_row]
+        for i in range(0, len(logo_files), cols_per_row)
+    ]
+    # Display grid
+    for row in rows:
+        cols = st.columns(cols_per_row)
+        for idx, logo_file in enumerate(row):
+            with cols[idx]:
+                st.image(
+                    os.path.join(logo_path, logo_file),
+                    use_container_width=True,
+                    caption=logo_file.split(".")[0].title(),
+                )
+
 
 st.title("LogoBot")
 st.markdown("Upload your data and get predictions.")
@@ -26,32 +59,10 @@ if st.button("Create DataFrame"):
         st.success(f"Created a DataFrame with {len(df)} companies.")
         st.dataframe(df)
         pull_logos(df)
-        st.success("function run")
+        preview_images()
+        processed = load_and_process_logos(logo_path)
+        create_powerpoint(processed)
+        st.success(f"PPT output")
 
-        logo_files = [
-            f for f in logos if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
-        ]
-
-        # Sort alphabetically for consistency
-        logo_files.sort()
-
-        # Choose number of columns
-        cols_per_row = 5
-        rows = [
-            logo_files[i : i + cols_per_row]
-            for i in range(0, len(logo_files), cols_per_row)
-        ]
-
-        # Display grid
-        for row in rows:
-            cols = st.columns(cols_per_row)
-            for idx, logo_file in enumerate(row):
-                logo_path = os.path.join(logos, logo_file)
-                with cols[idx]:
-                    st.image(
-                        logo_path,
-                        use_column_width=True,
-                        caption=logo_file.split(".")[0].title(),
-                    )
     else:
         st.warning("Please enter at least one company name.")

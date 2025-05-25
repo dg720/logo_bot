@@ -46,7 +46,7 @@ def extract_domain(url):
 
 
 @retrying.retry(stop_max_attempt_number=5, wait_fixed=2000)
-def download_logo(company_url, company_name, save_path="logos"):
+def download_logo(company_url, company_name, save_path="logo_backup"):
     """
     Downloads a company logo using Brandfetch and saves it locally.
     Retries up to 5 times in case of failure.
@@ -115,10 +115,10 @@ def pull_logos(companies):
     #       print("CSV must contain a 'Company' column.")
     #      return
 
-    os.makedirs("logos", exist_ok=True)
+    os.makedirs("logo_backup", exist_ok=True)
 
     for company in df["Company"]:
-        existing_files = os.listdir("logos")
+        existing_files = os.listdir("logo_backup")
 
         # Skip if logo already exists for this company
         if any(company in file for file in existing_files):
