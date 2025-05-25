@@ -9,27 +9,25 @@ from src.output import (
 )
 import os
 
+# ---------------- Configuration ----------------
 cache_path = "logo_cache"
 backup_path = "logo_backup"
 
 
+# ---------------- Utilities ----------------
 def preview_images(folder):
     logo_files = [
         f
         for f in os.listdir(folder)
         if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp"))
     ]
-
-    # Sort alphabetically for consistency
     logo_files.sort()
-
-    # Choose number of columns
     cols_per_row = 5
     rows = [
         logo_files[i : i + cols_per_row]
         for i in range(0, len(logo_files), cols_per_row)
     ]
-    # Display grid
+
     for row in rows:
         cols = st.columns(cols_per_row)
         for idx, logo_file in enumerate(row):
@@ -41,25 +39,29 @@ def preview_images(folder):
                 )
 
 
-st.title("LogoBot")
+# ---------------- App Title ----------------
+st.markdown("<h1 style='color:#4A90E2;'>🤖 LogoBot</h1>", unsafe_allow_html=True)
 st.markdown(
-    "Application to dynamically source and reformat company logos, creating a PPT output array"
+    "<p style='font-size:16px;'>Automatically source, format, and arrange company logos into a downloadable PowerPoint grid.</p>",
+    unsafe_allow_html=True,
+)
+st.divider()
+
+# ---------------- Step 1 ----------------
+st.markdown(
+    "<h3 style='color:#1f77b4;'>🏁 Step 1: Source Logos</h3>", unsafe_allow_html=True
 )
 
-st.write("### Step 1: Source Logos")
-
 company_input = st.text_area(
-    "Input company names to add, separated by a new line",
+    "✍️ Enter company names (one per line)",
     height=200,
     placeholder="e.g. Apple\nGoogle\nAmazon",
 )
 
 c1, c2 = st.columns(2)
-
 with c1:
-    if st.button("Run"):
+    if st.button("🚀 Run"):
         if company_input.strip():
-            # Clean and split the input into a list
             company_list = [
                 name.strip()
                 for name in company_input.strip().split("\n")
@@ -67,43 +69,55 @@ with c1:
             ]
             df = pd.DataFrame(company_list, columns=["Company"])
             pull_logos(df)
-            st.success("Logo search complete")
+            st.success("✅ Logos downloaded successfully!")
         else:
-            st.warning("Please enter at least one company name.")
+            st.warning("⚠️ Please enter at least one company name.")
 
 with c2:
-    if st.button("Delete all saved logos"):
+    if st.button("🗑️ Delete all saved logos"):
         clear_folder(backup_path)
-        st.success("Folder cleared")
+        st.success("🧹 Logo folder cleared.")
 
-st.write("###### Display active logos:")
-if st.button("Preview saved logos"):
+st.markdown("###### 👁️ Preview saved logos:")
+if st.button("Preview logos"):
     preview_images(backup_path)
 
-st.write("### Step 2: Generate PPT")
+st.divider()
 
-st.write(
-    "###### Tip: ensure that there is sufficient height / width to match the number of rows / columns"
+# ---------------- Step 2 ----------------
+st.markdown(
+    "<h3 style='color:#2ca02c;'>🖼️ Step 2: Generate PPT</h3>", unsafe_allow_html=True
 )
 
-col1, col2 = st.columns(2)
-rows = col1.number_input("Rows", min_value=1, value=5, step=1)
-columns = col1.number_input("Columns", min_value=1, value=5, step=1)
-height = col2.number_input("Height", min_value=0.5, value=5.0)
-width = col2.number_input("Width", min_value=0.5, value=5.0, step=1.0)
+st.info("💡 Tip: Make sure slide dimensions match your logo layout.")
 
-if st.button("Generate PPT"):
+col1, col2 = st.columns(2)
+rows = col1.number_input("🔢 Rows", min_value=1, value=5, step=1)
+columns = col1.number_input("🔢 Columns", min_value=1, value=5, step=1)
+height = col2.number_input("📏 Height (inches)", min_value=0.5, value=5.0)
+width = col2.number_input("📐 Width (inches)", min_value=0.5, value=5.0, step=1.0)
+
+if st.button("📸 Generate PPT"):
     params = configure_ppt_settings((columns, rows), (width, height))
     processed = load_and_process_logos(cache_path, **params)
     create_powerpoint(processed, **params)
-    st.success("Success")
+    st.success("🎉 PowerPoint created successfully!")
 
-st.write("### Step 3: Download PPT")
+st.divider()
+
+# ---------------- Step 3 ----------------
+st.markdown(
+    "<h3 style='color:#e67e22;'>📥 Step 3: Download PPT</h3>", unsafe_allow_html=True
+)
+
 file_name = "logos_presentation.pptx"
-with open(file_name, "rb") as f:
-    st.download_button(
-        label="Download PPT",
-        data=f,
-        file_name="logo_array.pptx",
-        mime="application/pptx",
-    )
+if os.path.exists(file_name):
+    with open(file_name, "rb") as f:
+        st.download_button(
+            label="⬇️ Download PowerPoint",
+            data=f,
+            file_name="logo_array.pptx",
+            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        )
+else:
+    st.warning("⚠️ Generate the presentation before downloading.")
