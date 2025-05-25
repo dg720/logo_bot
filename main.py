@@ -51,9 +51,10 @@ if st.button("Download Logos"):
             name.strip() for name in company_input.strip().split("\n") if name.strip()
         ]
         df = pd.DataFrame(company_list, columns=["Company"])
-        st.success(f"Created a DataFrame with {len(df)} companies.")
-        st.dataframe(df)
+        # st.success(f"Created a DataFrame with {len(df)} companies.")
+        # st.dataframe(df)
         pull_logos(df)
+        st.success("Logo search complete")
         preview_images()
 
     else:

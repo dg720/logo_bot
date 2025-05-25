@@ -1,12 +1,9 @@
 import os
 import requests
-import pandas as pd
 import time
+import streamlit as st
 from googlesearch import search
 from urllib.parse import urlparse
-
-# from PIL import Image
-# from io import BytesIO
 import random
 import retrying
 
@@ -56,10 +53,8 @@ def download_logo(company_url, company_name, save_path="logo_backup"):
         company_name (str): The display name to save the file as.
         save_path (str): Folder path to save the logos.
     """
-    api_key = "1ido2FzbOBCMRcIuMAs"  # NOTE: Exposing keys in code is not recommended
+    api_key = "1ido2FzbOBCMRcIuMAs"
     logo_url = f"https://cdn.brandfetch.io/{company_url}/w/512/h/94/logo?c={api_key}"
-
-    print(f"Fetching logo from: {logo_url}")
 
     # Random user-agent header to avoid basic scraping blocks
     headers = {
@@ -83,11 +78,10 @@ def download_logo(company_url, company_name, save_path="logo_backup"):
     ):
         os.makedirs(save_path, exist_ok=True)
 
-        # Determine file extension
         content_type = response.headers["Content-Type"]
         extension = content_type.split("/")[-1]
         if extension == "webp":
-            extension = "png"  # More universally supported format
+            extension = "png"
 
         file_path = os.path.join(save_path, f"{company_name}.{extension}")
 
@@ -95,10 +89,7 @@ def download_logo(company_url, company_name, save_path="logo_backup"):
         with open(file_path, "wb") as f:
             for chunk in response.iter_content(1024):
                 f.write(chunk)
-
-        print(f"Logo saved for {company_name}: {file_path}")
     else:
-        print(f"Invalid content type or failed request for {company_name}. Retrying...")
         raise Exception("Failed request")
 
 
@@ -109,35 +100,28 @@ def pull_logos(companies):
     Args:
         csv_path (str): Path to a CSV file with a 'Company' column.
     """
-    df = companies
-
-    #    if "Company" not in df.columns:
-    #       print("CSV must contain a 'Company' column.")
-    #      return
-
     os.makedirs("logo_backup", exist_ok=True)
+    num_companies = len(companies)
+    n = 0
+    bar = st.progress(0, text="Initialising...")
 
-    for company in df["Company"]:
+    for company in companies["Company"]:
+        n += 1
         existing_files = os.listdir("logo_backup")
+        bar.progress(n / num_companies, text=f"Searching for {company}")
 
         # Skip if logo already exists for this company
         if any(company in file for file in existing_files):
-            print(f"Skipping {company}, logo already exists.")
             continue
-
-        print(f"Processing: {company}")
 
         # Find website and domain
         website = get_company_website(company)
         if website:
             domain = extract_domain(website)
             if domain:
-                print(f"Extracted domain: {domain}")
                 download_logo(domain, company)
 
         # Sleep to avoid being flagged for automated requests
         time.sleep(random.uniform(1, 3))
 
-
-if __name__ == "__main__":
-    pull_logos("companies.csv")
+    bar.empty()

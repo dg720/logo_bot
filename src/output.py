@@ -4,11 +4,7 @@ from PIL import Image
 from src.reformat import remove_white_background, auto_crop
 import os
 
-OUTPUT_FILE = "logos_presentation.pptx"
-
-# LOGO_POSITIONS = (5, 10)  # User input (columns, rows)
-# USER_WIDTH, USER_HEIGHT = (4, 9)  # User input
-# SLIDE_WIDTH, SLIDE_HEIGHT = Inches(USER_WIDTH), Inches(USER_HEIGHT)
+output_file = "logos_presentation.pptx"
 
 
 def configure_ppt_settings(logo_positions: tuple, slide_size: tuple):
@@ -125,6 +121,5 @@ def create_powerpoint(
 
         slide.shapes.add_picture(logo_path, x, y, width=width_in, height=height_in)
 
-    prs.save(OUTPUT_FILE)
-    print(f"PowerPoint saved as {OUTPUT_FILE}")
+    prs.save(output_file)
     return
