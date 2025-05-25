@@ -102,22 +102,22 @@ def download_logo(company_url, company_name, save_path="logos"):
         raise Exception("Failed request")
 
 
-def main(csv_path):
+def pull_logos(companies):
     """
     Main function that reads a CSV of companies and attempts to download their logos.
 
     Args:
         csv_path (str): Path to a CSV file with a 'Company' column.
     """
-    df = pd.read_csv(csv_path)
+    df = companies
 
-    if "Company" not in df.columns:
-        print("CSV must contain a 'Company' column.")
-        return
+    #    if "Company" not in df.columns:
+    #       print("CSV must contain a 'Company' column.")
+    #      return
 
     os.makedirs("logos", exist_ok=True)
 
-    for company in df["Company"].dropna():
+    for company in df["Company"]:
         existing_files = os.listdir("logos")
 
         # Skip if logo already exists for this company
@@ -140,4 +140,4 @@ def main(csv_path):
 
 
 if __name__ == "__main__":
-    main("companies.csv")
+    pull_logos("companies.csv")
