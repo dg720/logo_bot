@@ -83,3 +83,4 @@ def create_powerpoint(processed_logos):
 
     prs.save(OUTPUT_FILE)
     print(f"PowerPoint saved as {OUTPUT_FILE}")
+    return
