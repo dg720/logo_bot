@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from src.logos import pull_logos
-from src.output import load_and_process_logos, create_powerpoint
+from src.output import load_and_process_logos, create_powerpoint, configure_ppt_settings
 import os
 
 logo_path = "logo_backup"
@@ -38,12 +38,6 @@ def preview_images():
 st.title("LogoBot")
 st.markdown("Upload your data and get predictions.")
 
-# col1, col2 = st.columns(2)
-# home_value = col1.number_input("Home Value", min_value=0, value=500000)
-# deposit = col1.number_input("Deposit", min_value=0, value=100000)
-# interest_rate = col2.number_input("Interest Rate (in %)", min_value=0.0, value=5.5)
-# loan_term = col2.number_input("Loan Term (in years)", min_value=1, value=30)
-
 st.write("### Step 1: Source Logos")
 
 company_input = st.text_area(
@@ -66,9 +60,17 @@ if st.button("Download Logos"):
         st.warning("Please enter at least one company name.")
 
 st.write("### Step 2: Generate PPT")
+
+col1, col2 = st.columns(2)
+rows = col1.number_input("Rows", min_value=1, value=5, step=1)
+columns = col1.number_input("Columns", min_value=1, value=5, step=1)
+height = col2.number_input("Height", min_value=0.5, value=5.0)
+width = col2.number_input("Width", min_value=0.5, value=5.0, step=1.0)
+
 if st.button("Generate PPT"):
-    processed = load_and_process_logos(logo_path)
-    create_powerpoint(processed)
+    params = configure_ppt_settings((columns, rows), (width, height))
+    processed = load_and_process_logos(logo_path, **params)
+    create_powerpoint(processed, **params)
     st.success("PPT output")
 
 st.write("### Step 3: Download PPT")

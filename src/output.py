@@ -4,35 +4,69 @@ from PIL import Image
 from src.reformat import remove_white_background, auto_crop
 import os
 
-# ------------------ Configuration ------------------
-
-LOGO_FOLDER = "C:/Users/dhruv/Documents/logo_bot/src/logo_backup"
 OUTPUT_FILE = "logos_presentation.pptx"
-LOGO_POSITIONS = (5, 10)  # (columns, rows)
-USER_WIDTH, USER_HEIGHT = (4, 9)  # in inches
-SLIDE_WIDTH, SLIDE_HEIGHT = Inches(USER_WIDTH), Inches(USER_HEIGHT)
 
-# ------------------ Derived Parameters ------------------
-
-num_cols, num_rows = LOGO_POSITIONS
-LOGO_HEIGHT = int(USER_HEIGHT * 96 / num_rows / 2)
-slide_pixel_width = USER_WIDTH * 96
-MAX_WIDTH = int(slide_pixel_width / num_cols)
-
-# Compute horizontal positions
-col_spacing = SLIDE_WIDTH / (num_cols - 1)
-column_centers = []
-current_x = Inches(0.1)
-for _ in range(num_cols):
-    column_center = current_x + col_spacing / 2
-    column_centers.append(column_center)
-    current_x += col_spacing
-
-# Compute vertical spacing
-row_spacing = SLIDE_HEIGHT / (num_rows - 1)
+# LOGO_POSITIONS = (5, 10)  # User input (columns, rows)
+# USER_WIDTH, USER_HEIGHT = (4, 9)  # User input
+# SLIDE_WIDTH, SLIDE_HEIGHT = Inches(USER_WIDTH), Inches(USER_HEIGHT)
 
 
-def load_and_process_logos(folder):
+def configure_ppt_settings(logo_positions: tuple, slide_size: tuple):
+    """
+    Set up slide and logo layout parameters for PowerPoint generation.
+
+    Args:
+        logo_positions (tuple): (num_cols, num_rows) - Number of logos per row and column.
+        slide_size (tuple): (width_in_inches, height_in_inches) - Slide dimensions.
+
+    Returns:
+        dict: A dictionary containing layout configuration values.
+    """
+
+    num_cols, num_rows = logo_positions
+    user_width, user_height = slide_size
+    slide_width, slide_height = Inches(user_width), Inches(user_height)
+
+    # Derived Parameters
+    logo_height = int(user_height * 96 / num_rows / 2)
+    slide_pixel_width = user_width * 96
+    max_logo_width = int(slide_pixel_width / num_cols)
+
+    # Compute horizontal positions (centered columns)
+    col_spacing = slide_width / (num_cols - 1)
+    column_centers = []
+    current_x = Inches(0.1)
+    for _ in range(num_cols):
+        column_center = current_x + col_spacing / 2
+        column_centers.append(column_center)
+        current_x += col_spacing
+
+    # Compute vertical spacing
+    row_spacing = slide_height / (num_rows - 1)
+
+    return {
+        "num_cols": num_cols,
+        "num_rows": num_rows,
+        "slide_width": slide_width,
+        "slide_height": slide_height,
+        "logo_height": logo_height,
+        "max_logo_width": max_logo_width,
+        "column_centers": column_centers,
+        "row_spacing": row_spacing,
+    }
+
+
+def load_and_process_logos(
+    folder,
+    num_cols,
+    num_rows,
+    slide_width,
+    slide_height,
+    logo_height,
+    max_logo_width,
+    column_centers,
+    row_spacing,
+):
     """Load, clean, resize, and save logos."""
     logos = [
         f for f in os.listdir(folder) if f.lower().endswith((".png", ".jpg", ".jpeg"))
@@ -47,11 +81,11 @@ def load_and_process_logos(folder):
         img = auto_crop(img)
 
         aspect_ratio = img.width / img.height
-        new_width = int(LOGO_HEIGHT * aspect_ratio)
-        new_height = LOGO_HEIGHT
+        new_width = int(logo_height * aspect_ratio)
+        new_height = logo_height
 
-        if new_width > MAX_WIDTH:
-            new_width = MAX_WIDTH
+        if new_width > max_logo_width:
+            new_width = max_logo_width
             new_height = int(new_width / aspect_ratio)
 
         img = img.resize((new_width, new_height))
@@ -62,7 +96,17 @@ def load_and_process_logos(folder):
     return processed_logos
 
 
-def create_powerpoint(processed_logos):
+def create_powerpoint(
+    processed_logos,
+    num_cols,
+    num_rows,
+    slide_width,
+    slide_height,
+    logo_height,
+    max_logo_width,
+    column_centers,
+    row_spacing,
+):
     """Create PowerPoint presentation with logos arranged in a grid."""
     prs = Presentation()
     slide = prs.slides.add_slide(prs.slide_layouts[5])  # Blank slide
