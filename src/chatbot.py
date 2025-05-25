@@ -1,11 +1,13 @@
 import pandas as pd
 from openai import OpenAI
 import re
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# from dotenv import load_dotenv
+# import os
+import streamlit as st
+
+# load_dotenv()
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 
 def clean_lines(text):
