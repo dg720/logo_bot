@@ -106,6 +106,9 @@ def load_and_process_logos(
 
         processed_logos.append((os.path.join(folder, logo), new_width, new_height))
 
+    # Sort processed logos alphabetically by filename
+    processed_logos.sort(key=lambda x: os.path.basename(x[0]).lower())
+
     return processed_logos
 
 
