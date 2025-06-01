@@ -114,7 +114,7 @@ with c1:
             df = pd.DataFrame(company_list, columns=["Company"])
             clear_folder(session_cache_path)
             pull_logos_parallel(df, backup_path, session_cache_path)
-            st.success("✅ Logos downloaded successfully!")
+            # st.success("✅ Logos downloaded successfully!")
         else:
             st.warning("⚠️ Please enter at least one company name.")
 
