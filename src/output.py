@@ -80,12 +80,10 @@ def load_and_process_logos(
 ):
     """Load, clean, resize, and save logos."""
 
-    clear_folder(folder)
     logos = [
-        f
-        for f in os.listdir(backup_path)
-        if f.lower().endswith((".png", ".jpg", ".jpeg"))
+        f for f in os.listdir(folder) if f.lower().endswith((".png", ".jpg", ".jpeg"))
     ]
+    clear_folder(folder)
     processed_logos = []
 
     for logo in logos:

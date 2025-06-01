@@ -112,7 +112,8 @@ with c1:
                 if name.strip()
             ]
             df = pd.DataFrame(company_list, columns=["Company"])
-            pull_logos(df)
+            clear_folder(session_cache_path)
+            pull_logos(df, backup_path, session_cache_path)
             st.success("✅ Logos downloaded successfully!")
         else:
             st.warning("⚠️ Please enter at least one company name.")

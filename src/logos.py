@@ -43,7 +43,7 @@ def extract_domain(url):
 
 
 @retrying.retry(stop_max_attempt_number=5, wait_fixed=2000)
-def download_logo(company_url, company_name, save_path="logo_backup"):
+def download_logo(company_url, company_name, backup_path, session_cache_path):
     """
     Downloads a company logo using Brandfetch and saves it locally.
     Retries up to 5 times in case of failure.
@@ -76,31 +76,39 @@ def download_logo(company_url, company_name, save_path="logo_backup"):
     if response.status_code == 200 and "image" in response.headers.get(
         "Content-Type", ""
     ):
-        os.makedirs(save_path, exist_ok=True)
+        # os.makedirs(backup_path, exist_ok=True)
 
         content_type = response.headers["Content-Type"]
         extension = content_type.split("/")[-1]
         if extension == "webp":
             extension = "png"
 
-        file_path = os.path.join(save_path, f"{company_name}.{extension}")
+        file_path = os.path.join(backup_path, f"{company_name}.{extension}")
 
         # Save image to disk
         with open(file_path, "wb") as f:
             for chunk in response.iter_content(1024):
                 f.write(chunk)
+
+        cache_path = os.path.join(session_cache_path, f"{company_name}.{extension}")
+
+        # Save cache to disk
+        with open(cache_path, "wb") as f:
+            for chunk in response.iter_content(1024):
+                f.write(chunk)
+
     else:
         raise Exception("Failed request")
 
 
-def pull_logos(companies):
+def pull_logos(companies, backup_path, session_cache_path):
     """
     Main function that reads a CSV of companies and attempts to download their logos.
 
     Args:
         csv_path (str): Path to a CSV file with a 'Company' column.
     """
-    os.makedirs("logo_backup", exist_ok=True)
+    # os.makedirs("logo_backup", exist_ok=True)
     num_companies = len(companies)
     n = 0
     bar = st.progress(0, text="Initialising...")
@@ -119,7 +127,7 @@ def pull_logos(companies):
         if website:
             domain = extract_domain(website)
             if domain:
-                download_logo(domain, company)
+                download_logo(domain, company, backup_path, session_cache_path)
 
         # Sleep to avoid being flagged for automated requests
         time.sleep(random.uniform(1, 3))
