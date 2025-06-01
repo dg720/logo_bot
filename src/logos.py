@@ -6,6 +6,7 @@ from googlesearch import search
 from urllib.parse import urlparse
 import random
 import retrying
+import shutil
 
 
 def get_company_website(company_name):
@@ -103,33 +104,40 @@ def download_logo(company_url, company_name, backup_path, session_cache_path):
 
 def pull_logos(companies, backup_path, session_cache_path):
     """
-    Main function that reads a CSV of companies and attempts to download their logos.
-
-    Args:
-        csv_path (str): Path to a CSV file with a 'Company' column.
+    Reads a list of companies and downloads their logos, using cache and backup folders.
     """
-    # os.makedirs("logo_backup", exist_ok=True)
+    # os.makedirs(backup_path, exist_ok=True)
+    # os.makedirs(session_cache_path, exist_ok=True)
+
     num_companies = len(companies)
-    n = 0
     bar = st.progress(0, text="Initialising...")
 
-    for company in companies["Company"]:
-        n += 1
-        existing_files = os.listdir("logo_backup")
-        bar.progress(n / num_companies, text=f"Searching for {company}")
+    for n, company in enumerate(companies["Company"], start=1):
+        bar.progress(n / num_companies, text=f"Processing {company}...")
 
-        # Skip if logo already exists for this company
-        if any(company in file for file in existing_files):
-            continue
+        # Check for existing logo in backup
+        backup_file = next(
+            (f for f in os.listdir(backup_path) if f.startswith(company)), None
+        )
 
-        # Find website and domain
+        if backup_file:
+            # Copy to session cache if not already there
+            source = os.path.join(backup_path, backup_file)
+            destination = os.path.join(session_cache_path, backup_file)
+            if not os.path.exists(destination):
+                shutil.copy2(source, destination)
+            continue  # Skip download if already exists
+
+        # If not in backup, try to find and download
         website = get_company_website(company)
         if website:
             domain = extract_domain(website)
             if domain:
-                download_logo(domain, company, backup_path, session_cache_path)
+                try:
+                    download_logo(domain, company, backup_path, session_cache_path)
+                except Exception as e:
+                    st.warning(f"Failed to download logo for {company}: {e}")
 
-        # Sleep to avoid being flagged for automated requests
-        time.sleep(random.uniform(1, 3))
+        time.sleep(random.uniform(1, 3))  # polite delay
 
     bar.empty()
