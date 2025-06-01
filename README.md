@@ -1,6 +1,12 @@
 # logo_bot
 
-Hi! I'm Dhruv (@dg720) and this is **logo_bot**, a Streamlit-based web app that automatically finds and formats company logos into a downloadable PowerPoint file.
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dg720-logo-bot-main-xvjsh8.streamlit.app/)
+![Python Version](https://img.shields.io/badge/python-3.9+-blue)
+![License](https://img.shields.io/github/license/dg720/logo_bot)
+![Last Commit](https://img.shields.io/github/last-commit/dg720/logo_bot)
+![Repo Stars](https://img.shields.io/github/stars/dg720/logo_bot?style=social)
+
+! I'm Dhruv (@dg720) and this is **logo_bot**, a Streamlit-based web app that automatically finds and formats company logos into a downloadable PowerPoint file.
 
 Whether you're building a client deck, showcasing a portfolio, or putting together a partnership slide, this tool saves you the tedious work of Googling logos, resizing them, and formatting them into PowerPoint.
 
