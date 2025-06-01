@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 from src.chatbot import get_company_list_from_prompt
-from src.logos import pull_logos
+from src.logos import pull_logos_parallel
 from src.output import (
     load_and_process_logos,
     create_powerpoint,
@@ -113,7 +113,7 @@ with c1:
             ]
             df = pd.DataFrame(company_list, columns=["Company"])
             clear_folder(session_cache_path)
-            pull_logos(df, backup_path, session_cache_path)
+            pull_logos_parallel(df, backup_path, session_cache_path)
             st.success("✅ Logos downloaded successfully!")
         else:
             st.warning("⚠️ Please enter at least one company name.")
