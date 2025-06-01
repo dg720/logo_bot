@@ -84,18 +84,18 @@ def download_logo(company_url, company_name, backup_path, session_cache_path):
             extension = "png"
 
         file_path = os.path.join(backup_path, f"{company_name}.{extension}")
-
-        # Save image to disk
-        with open(file_path, "wb") as f:
-            for chunk in response.iter_content(1024):
-                f.write(chunk)
-
         cache_path = os.path.join(session_cache_path, f"{company_name}.{extension}")
 
-        # Save cache to disk
+        # Read all content once
+        content = response.content
+
+        # Save to backup path
+        with open(file_path, "wb") as f:
+            f.write(content)
+
+        # Save to cache path
         with open(cache_path, "wb") as f:
-            for chunk in response.iter_content(1024):
-                f.write(chunk)
+            f.write(content)
 
     else:
         raise Exception("Failed request")
