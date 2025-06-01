@@ -2,7 +2,7 @@
 
 [![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://dg720-logo-bot-main-xvjsh8.streamlit.app/)
 ![Python Version](https://img.shields.io/badge/python-3.9+-blue)
-![Last Commit](https://img.shields.io/github/last-commit/dg720/logo_bot
+![Last Commit](https://img.shields.io/github/last-commit/dg720/logo_bot)
 
 This is **logo_bot**, a Streamlit-based web app that automatically finds and formats company logos into a downloadable PowerPoint file.
 
