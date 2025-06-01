@@ -9,10 +9,19 @@ from src.output import (
     clear_folder,
 )
 import os
+import uuid
 
 # ---------------- Configuration ----------------
 cache_path = "logo_cache"
 backup_path = "logo_backup"
+
+# Generate unique ID for this user session
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())
+
+# Create session-specific logo cache folder
+session_cache_path = os.path.join("logo_cache", st.session_state.session_id)
+os.makedirs(session_cache_path, exist_ok=True)
 
 
 # ---------------- Utilities ----------------
@@ -60,7 +69,7 @@ if "manual_input" not in st.session_state:
 # --- Option B: AI-based generation ---
 st.markdown("**Option A: Generate companies using ChatGPT**")
 ai_prompt = st.text_input(
-    "💬 Describe the type of companies (e.g., 'Top 20 automotive OEMs')",
+    "💬 Describe the type of companies (e.g., 'Top automotive OEMs')",
     key="ai_prompt",
 )
 
@@ -110,12 +119,12 @@ with c1:
 
 with c2:
     if st.button("🗑️ Delete all saved logos"):
-        clear_folder(backup_path)
+        clear_folder(session_cache_path)
         st.success("🧹 Logo folder cleared.")
 
 st.markdown("###### 👁️ Preview saved logos:")
 if st.button("Preview logos"):
-    preview_images(backup_path)
+    preview_images(session_cache_path)
 
 st.divider()
 
@@ -134,7 +143,7 @@ width = col2.number_input("📐 Width (inches)", min_value=0.5, value=5.0, step=
 
 if st.button("📸 Generate PPT"):
     params = configure_ppt_settings((columns, rows), (width, height))
-    processed = load_and_process_logos(cache_path, **params)
+    processed = load_and_process_logos(session_cache_path, **params)
     create_powerpoint(processed, **params)
     st.success("🎉 PowerPoint created successfully!")
 
