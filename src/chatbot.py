@@ -25,7 +25,7 @@ def clean_lines(text):
 
 
 def get_company_list_from_prompt(
-    prompt: str, model: str = "gpt-3.5-turbo", max_tokens: int = 300
+    prompt: str, model: str = "gpt-3.5-turbo", max_tokens: int = 1000
 ) -> pd.DataFrame:
     full_prompt = (
         f"Please list the names of {prompt}. "
