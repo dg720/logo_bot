@@ -93,6 +93,12 @@ def save_placeholder_image(company_name, backup_path, session_cache_path):
     filename = f"{company_name}.png"
     img.save(os.path.join(backup_path, filename))
     img.save(os.path.join(session_cache_path, filename))
+    # debug
+    img_path = os.path.join(session_cache_path, f"{company_name}.png")
+    if not os.path.exists(img_path):
+        st.error(f"❌ Placeholder not saved for {company_name}")
+    else:
+        st.success(f"✅ Placeholder saved for {company_name}")
 
 
 # --- Single Threaded Logo Logic ---
