@@ -3,13 +3,10 @@ import requests
 import streamlit as st
 import random
 import shutil
-import csv
 from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from googlesearch import search
 import retrying
-from threading import Lock
-from PIL import Image, ImageDraw, ImageFont
 
 
 # --- Utilities ---
@@ -72,33 +69,7 @@ def download_logo(company_url, company_name, backup_path, session_cache_path):
         raise Exception("Logo download failed")
 
 
-def save_placeholder_image(company_name, backup_path, session_cache_path):
-    width, height = 512, 94
-    background_color = (230, 230, 230)
-    text_color = (80, 80, 80)
-
-    img = Image.new("RGB", (width, height), background_color)
-    draw = ImageDraw.Draw(img)
-
-    try:
-        font = ImageFont.truetype("arial.ttf", 28)
-    except:
-        font = ImageFont.load_default()
-
-    text_width, text_height = draw.textsize(company_name, font=font)
-    position = ((width - text_width) // 2, (height - text_height) // 2)
-
-    draw.text(position, company_name, fill=text_color, font=font)
-
-    filename = f"{company_name}.png"
-    img.save(os.path.join(backup_path, filename))
-    img.save(os.path.join(session_cache_path, filename))
-
-
-# --- Single Threaded Logo Logic ---
-
-
-def process_single_logo(company, backup_path, session_cache_path, failed_logos, lock):
+def process_single_logo(company, backup_path, session_cache_path):
     try:
         backup_file = next(
             (f for f in os.listdir(backup_path) if f.startswith(company)), None
@@ -116,43 +87,23 @@ def process_single_logo(company, backup_path, session_cache_path, failed_logos, 
             domain = extract_domain(website)
             if domain:
                 download_logo(domain, company, backup_path, session_cache_path)
-            else:
-                raise Exception("Could not extract domain.")
-        else:
-            raise Exception("Could not find website.")
 
     except Exception as e:
         st.warning(f"⚠️ {company}: {str(e)}")
-        with lock:
-            failed_logos.append(company)
-        save_placeholder_image(company, backup_path, session_cache_path)
 
 
-# --- Parallel Logo Pull ---
+# --- Main Parallel Pull Function ---
 
 
-def pull_logos_parallel(
-    companies,
-    backup_path,
-    session_cache_path,
-    max_workers=8,
-    failure_log_path="failed_logos.csv",
-):
+def pull_logos_parallel(companies, backup_path, session_cache_path, max_workers=8):
     st.write(f"Downloading logos for {len(companies)} companies...")
 
     bar = st.progress(0, text="Starting...")
-    failed_logos = []
-    lock = Lock()
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(
-                process_single_logo,
-                company,
-                backup_path,
-                session_cache_path,
-                failed_logos,
-                lock,
+                process_single_logo, company, backup_path, session_cache_path
             ): company
             for company in companies["Company"]
         }
@@ -162,15 +113,4 @@ def pull_logos_parallel(
             bar.progress(i / len(futures), text=f"Processed {company}")
 
     bar.empty()
-
-    if failed_logos:
-        with open(failure_log_path, mode="w", newline="") as file:
-            writer = csv.writer(file)
-            writer.writerow(["Company"])
-            for company in failed_logos:
-                writer.writerow([company])
-        st.warning(
-            f"⚠️ {len(failed_logos)} logos failed. See `{failure_log_path}` for details."
-        )
-    else:
-        st.success("✅ All logos processed successfully.")
+    st.success("✅ All logos processed.")
