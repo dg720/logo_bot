@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import os
+import uuid
+
 from src.chatbot import get_company_list_from_prompt
 from src.logos import pull_logos_parallel
 from src.output import (
@@ -8,24 +11,28 @@ from src.output import (
     configure_ppt_settings,
     clear_folder,
 )
-import os
-import uuid
 
 # ---------------- Configuration ----------------
 cache_path = "logo_cache"
 backup_path = "logo_backup"
 
-# Generate unique ID for this user session
+# Generate and store a unique session ID for the current user
 if "session_id" not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
 
-# Create session-specific logo cache folder
-session_cache_path = os.path.join("logo_cache", st.session_state.session_id)
+# Create a session-specific logo cache directory
+session_cache_path = os.path.join(cache_path, st.session_state.session_id)
 os.makedirs(session_cache_path, exist_ok=True)
 
 
-# ---------------- Utilities ----------------
+# ---------------- Utility Functions ----------------
 def preview_images(folder):
+    """
+    Displays a grid preview of all logo images stored in a given folder.
+
+    Args:
+        folder (str): Path to the folder containing logo image files.
+    """
     logo_files = [
         f
         for f in os.listdir(folder)
@@ -49,24 +56,24 @@ def preview_images(folder):
                 )
 
 
-# ---------------- App Title ----------------
+# ---------------- App Header ----------------
 st.markdown("<h1 style='color:#4A90E2;'>🤖 LogoBot</h1>", unsafe_allow_html=True)
 st.markdown(
-    "<p style='font-size:16px;'>Automatically source, format, and arrange company logos into a downloadable PowerPoint grid. It is recommended to delete all saved logos upon starting the app </p>",
+    "<p style='font-size:16px;'>Automatically source, format, and arrange company logos into a downloadable PowerPoint grid. It is recommended to delete all saved logos upon starting the app.</p>",
     unsafe_allow_html=True,
 )
 st.divider()
 
-# ---------------- Step 1 ----------------
+# ---------------- Step 1: Source Logos ----------------
 st.markdown(
     "<h3 style='color:#1f77b4;'>🏁 Step 1: Source Logos</h3>", unsafe_allow_html=True
 )
 
-# Initialize session state if not already
+# Initialize manual input state if not already done
 if "manual_input" not in st.session_state:
     st.session_state.manual_input = ""
 
-# --- Option B: AI-based generation ---
+# --- Option A: AI-generated company list using GPT ---
 st.markdown("**Option A: Generate companies using ChatGPT**")
 ai_prompt = st.text_input(
     "💬 Describe the type of companies (e.g., 'Top automotive OEMs')",
@@ -86,7 +93,7 @@ if st.button("🤖 Generate with ChatGPT"):
     else:
         st.warning("⚠️ Please enter a description.")
 
-# --- Option A: Manual entry (auto-filled from AI if used) ---
+# --- Option B: Manual company name entry ---
 st.markdown("**Option B: Enter company names manually**")
 company_input = st.text_area(
     "✍️ One company per line",
@@ -95,12 +102,12 @@ company_input = st.text_area(
     key="manual_text_input",
 )
 
-# Update session state with current text box content
+# Keep input synced in session state
 st.session_state.manual_input = company_input
 
 st.divider()
 
-# Run and clear buttons
+# ---------------- Run and Clear Controls ----------------
 c1, c2 = st.columns(2)
 
 with c1:
@@ -112,9 +119,8 @@ with c1:
                 if name.strip()
             ]
             df = pd.DataFrame(company_list, columns=["Company"])
-            clear_folder(session_cache_path)
+            clear_folder(session_cache_path)  # Clean folder before pulling
             pull_logos_parallel(df, backup_path, session_cache_path)
-            # st.success("✅ Logos downloaded successfully!")
         else:
             st.warning("⚠️ Please enter at least one company name.")
 
@@ -123,19 +129,20 @@ with c2:
         clear_folder(session_cache_path)
         st.success("🧹 Logo folder cleared.")
 
+# Preview logos
 st.markdown("###### 👁️ Preview saved logos:")
 if st.button("Preview logos"):
     preview_images(session_cache_path)
 
 st.divider()
 
-# ---------------- Step 2 ----------------
+# ---------------- Step 2: Generate PowerPoint ----------------
 st.markdown(
     "<h3 style='color:#2ca02c;'>🖼️ Step 2: Generate PPT</h3>", unsafe_allow_html=True
 )
-
 st.info("💡 Tip: Make sure slide dimensions match your logo layout.")
 
+# User input: layout and slide dimensions
 col1, col2 = st.columns(2)
 rows = col1.number_input("🔢 Rows", min_value=1, value=5, step=1)
 columns = col1.number_input("🔢 Columns", min_value=1, value=5, step=1)
@@ -150,7 +157,7 @@ if st.button("📸 Generate PPT"):
 
 st.divider()
 
-# ---------------- Step 3 ----------------
+# ---------------- Step 3: Download PowerPoint ----------------
 st.markdown(
     "<h3 style='color:#e67e22;'>📥 Step 3: Download PPT</h3>", unsafe_allow_html=True
 )
