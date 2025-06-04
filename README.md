@@ -66,7 +66,7 @@ The app is structured with a modular backend and a Streamlit-based UI.
    - Auto-cropped to remove transparent padding (`auto_crop`)
 
 2. **Resizing & Scaling**  
-   Logos are resized to a target height (determined by grid dimensions / slide size) for visual consistency:
+   - Logos are resized to a target height (determined by grid dimensions / slide size) for visual consistency:
    - If width exceeds a max threshold, it is capped and height is recalculated to maintain aspect ratio 
 
 3. **Grid Layout in PowerPoint**  
