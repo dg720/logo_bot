@@ -14,7 +14,7 @@ Try it live: [logo_bot Streamlit App](https://dg720-logo-bot-main-xvjsh8.streaml
 
 ## Overview
 
-- **Search**: Input a list of company names manually or paste in bulk using a ChatGPT-powered prompt.
+- **Search**: Input a list of company names manually or paste in bulk using a AI-powered prompt.
 - **Source**: The app fetches the most relevant logos using a hybrid of Brandfetch and fallback scraping.
 - **Preview**: View the logos in a clean, scrollable grid with quick quality checks.
 - **Download**: Export the result as a PowerPoint file with logos neatly arranged in a grid and scaled to fit.
@@ -25,7 +25,7 @@ Try it live: [logo_bot Streamlit App](https://dg720-logo-bot-main-xvjsh8.streaml
 ## How to Use
 
 1. Open the app at the link above.
-2. Enter company names—either type them or paste a list (one per line).
+2. Enter company names—either type them, paste a list (one per line), or try an AI-powered prompt.
 3. Click **Run** to fetch and preview logos.
 4. Configure layout options like slide dimensions and grid format.
 5. Click **Export to PowerPoint** to download the presentation.
