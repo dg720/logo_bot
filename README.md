@@ -14,7 +14,7 @@ Try it live: [logo_bot Streamlit App](https://dg720-logo-bot-main-xvjsh8.streaml
 
 ## Overview
 
-- **Search**: Input a list of company names manually or paste in bulk.
+- **Search**: Input a list of company names manually or paste in bulk using a ChatGPT-powered prompt.
 - **Source**: The app fetches the most relevant logos using a hybrid of Brandfetch and fallback scraping.
 - **Preview**: View the logos in a clean, scrollable grid with quick quality checks.
 - **Download**: Export the result as a PowerPoint file with logos neatly arranged in a grid and scaled to fit.
@@ -41,7 +41,7 @@ The app is structured with a modular backend and a Streamlit-based UI.
 ### Core Components
 
 - `src/logos.py`:  
-  Fetches logos via Brandfetch and fallback scraping. Saves logos in a standardized format (`.png`, `.webp`).
+  Fetches logos via Brandfetch and fallback scraping. Saves logos in a standardized format.
 
 - `src/output.py`:  
   Uses `python-pptx` to:
@@ -57,10 +57,22 @@ The app is structured with a modular backend and a Streamlit-based UI.
 - `logo_cache/`: Temporary session-specific logo storage.
 - `logo_backup/`: Persistent storage for recovered or previously used logos.
 
-### Image Processing
+### How Logo Resizing & Layout Works
 
-- Optional whitespace trimming and auto-cropping using Pillow
-- Aspect-ratio preservation for clean logo scaling
+1. **Logo Preprocessing**  
+   Each logo is:
+   - Opened using `Pillow`
+   - Stripped of white background (`remove_white_background`)
+   - Auto-cropped to remove transparent padding (`auto_crop`)
+
+2. **Resizing & Scaling**  
+   Logos are resized to a target height (determined by grid dimensions / slide size) for visual consistency:
+   - If width exceeds a max threshold, it is capped and height is recalculated to maintain aspect ratio 
+
+3. **Grid Layout in PowerPoint**  
+   - Logos are arranged into a grid based on configured rows and columns
+   - Each logo is centered within its cell using calculated X/Y offsets
+   - Logos are inserted with `python-pptx` at precise positions and dimensions
 
 ---
 
@@ -78,14 +90,9 @@ The app is structured with a modular backend and a Streamlit-based UI.
 
 ---
 
-## Roadmap
-
-Planned features:
+## Potential features
 
 - Manual logo override via drag-and-drop
-- Advanced search filters (e.g., SVG only, transparent backgrounds)
+- Support for multiple API fallback sources and URL verification through AI Agent 
 - AI-based logo quality detection and replacement
-- Support for multiple API fallback sources
-- Branded PowerPoint template options
-- CSV-based batch processing for enterprise users
 
