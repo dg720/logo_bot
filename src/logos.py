@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from googlesearch import search
 import retrying
+import threading
 
 
 # --- Utilities ---
@@ -69,7 +70,7 @@ def download_logo(company_url, company_name, backup_path, session_cache_path):
         raise Exception("Logo download failed")
 
 
-def process_single_logo(company, backup_path, session_cache_path):
+def process_single_logo(company, backup_path, session_cache_path, failed_logos, lock):
     try:
         backup_file = next(
             (f for f in os.listdir(backup_path) if f.startswith(company)), None
@@ -87,9 +88,14 @@ def process_single_logo(company, backup_path, session_cache_path):
             domain = extract_domain(website)
             if domain:
                 download_logo(domain, company, backup_path, session_cache_path)
+            else:
+                raise Exception("Could not extract domain")
+        else:
+            raise Exception("Could not find website")
 
     except Exception as e:
-        st.warning(f"⚠️ {company}: {str(e)}")
+        with lock:
+            failed_logos.append(company)
 
 
 # --- Main Parallel Pull Function ---
@@ -100,10 +106,18 @@ def pull_logos_parallel(companies, backup_path, session_cache_path, max_workers=
 
     bar = st.progress(0, text="Starting...")
 
+    failed_logos = []
+    lock = threading.Lock()
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = {
             executor.submit(
-                process_single_logo, company, backup_path, session_cache_path
+                process_single_logo,
+                company,
+                backup_path,
+                session_cache_path,
+                failed_logos,
+                lock,
             ): company
             for company in companies["Company"]
         }
@@ -114,3 +128,7 @@ def pull_logos_parallel(companies, backup_path, session_cache_path, max_workers=
 
     bar.empty()
     st.success("✅ All logos processed.")
+
+    if failed_logos:
+        st.error("⚠️ Logos could not be found for the following companies:")
+        st.markdown("\n".join(f"- {name}" for name in failed_logos))
