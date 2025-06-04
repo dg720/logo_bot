@@ -95,4 +95,5 @@ The app is structured with a modular backend and a Streamlit-based UI.
 - Manual logo override via drag-and-drop
 - Support for multiple API fallback sources and URL verification through AI Agent 
 - AI-based logo quality detection and replacement
-
+- Option to include text-based placeholder logos; currently, logos missing from the API show 'Brandfetch' as a placeholder
+- More rigorous prompt engineering to ensure accuracy of AI-driven results
