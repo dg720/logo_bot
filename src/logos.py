@@ -130,5 +130,6 @@ def pull_logos_parallel(companies, backup_path, session_cache_path, max_workers=
     st.success("✅ All logos processed.")
 
     if failed_logos:
-        st.error("⚠️ Logos could not be found for the following companies:")
-        st.markdown("\n".join(f"- {name}" for name in failed_logos))
+        error_message = "⚠️ Logos could not be found for the following companies:\n\n"
+        error_message += "\n".join(f"- {name}" for name in failed_logos)
+        st.error(error_message)
